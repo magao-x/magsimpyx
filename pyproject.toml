@@ -1,0 +1,38 @@
+[project]
+name = "magsimpyx"
+dynamic = ["version"]
+authors = [
+    {name = "Sebastiaan Haffert", email = "shaffert@arizona.edu"},
+]
+description = "A python module to simulate the MagAO-X system."
+readme = "README.md"
+license = {file = "LICENSE"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Astronomy"
+]
+
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib>=2.0.0",
+    "hcipy"
+]
+
+[project.urls]
+repository = "https://github.com/magao-x/magsimpyx"
+
+[build-system]
+requires = ["setuptools>=61.2", "setuptools_scm[toml]>=7"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["magsimpyx"]
+zip-safe = false
+include-package-data = false
+
+[tool.setuptools_scm]
+write_to = "magsimpyx/_version.py"
