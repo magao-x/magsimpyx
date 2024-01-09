@@ -1,5 +1,5 @@
 import numpy as np
-from hcipy import *
+from hcipy import make_obstructed_circular_aperture, make_circular_aperture, make_spider
 
 def make_magaox_bump_mask(normalized=False, with_spiders=True):
     '''Make the Magellan bump mask.
