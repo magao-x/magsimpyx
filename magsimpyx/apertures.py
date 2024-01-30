@@ -1,5 +1,5 @@
 import numpy as np
-from hcipy import make_obstructed_circular_aperture, make_circular_aperture, make_spider
+from hcipy import make_obstructed_circular_aperture, make_circular_aperture, make_spider, Field, make_regular_polygon_aperture, make_elliptical_aperture
 
 __all__ = [
     'make_magaox_bump_mask',
