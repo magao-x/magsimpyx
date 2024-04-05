@@ -4,7 +4,7 @@ from hcipy import make_obstructed_circular_aperture, make_circular_aperture, mak
 __all__ = [
     'make_magaox_bump_mask',
     'make_magaox_large_lyot_stop',
-	'make_gmt_lyot_aperture',
+	'make_gmt_lyot_aperture'
 ]
 
 def make_magaox_bump_mask(normalized=False, with_spiders=True):
