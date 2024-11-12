@@ -30,7 +30,7 @@ def make_magaox_bump_mask(normalized=False, with_spiders=True):
 
     bump_mask_diameter = 0.5742e-3 * magnification_factor
 
-    bump_mask_pos = np.array([2.853e-3 * magnification_factor, -0.6705e-3 * magnification_factor])
+    bump_mask_pos = np.array([2.853e-3, -0.6705e-3]) * magnification_factor
 
     radius = np.hypot(bump_mask_pos[0], bump_mask_pos[1])
     theta = np.arctan2(bump_mask_pos[1], bump_mask_pos[0]) - np.deg2rad(25.2) #+ np.pi/2 # Adjusted bump angle to better center it on spider
@@ -92,14 +92,14 @@ def make_magaox_large_lyot_stop(normalized=False, with_spiders=True):
     bump_mask_pos = np.array([2.853e-3, -0.6705e-3]) * magnification_factor
 
     radius = np.hypot(bump_mask_pos[0], bump_mask_pos[1])
-    theta = np.arctan2(bump_mask_pos[1], bump_mask_pos[0]) - 0 * np.rad2deg(38.7747) + np.pi/2 # Adjusted bump angle to better center it on spider
+    theta = np.arctan2(bump_mask_pos[1], bump_mask_pos[0]) - np.deg2rad(25.2)
     bump_mask_pos = [radius * np.cos(theta), radius * np.sin(theta)]
 
     pupil_diameter = 6.5 # meter
     spider_width1 = 0.3830e-3 * magnification_factor # meter 
     spider_width2 = 0.3830e-3  * magnification_factor # meter
     central_obscuration_ratio = mask_inner / mask_outer 
-    spider_offset = np.array([0.34, 0])  # meter
+    spider_offset = np.array([0, 0.34])  # meter
 
     if normalized:
         spider_width1 /= pupil_diameter
