@@ -7,16 +7,19 @@ __all__ = [
 	'make_gmt_lyot_aperture'
 ]
 
-def make_magaox_bump_mask(normalized=False, with_spiders=True):
+def make_magaox_bump_mask(normalized=False, with_spiders=True, pupil_diameter=6.5):
     '''Make the Magellan bump mask.
 
     Parameters
     ----------
     normalized : boolean
-        If this is True, the outer diameter will be scaled to 1. Otherwise, the
-        diameter of the pupil will be 6.5 meters.
+        If this is True, the outer diameter will be scaled to 1.
     with_spiders: boolean
         If this is False, the spiders will be left out.
+    pupil_diameter : float
+        Physical pupil diameter in meters when `normalized` is False.
+        Default is 6.5 (previous behavior). Set to 9e-3 for the native mask scale.
+        Using `pupil_diameter=1.0` is equivalent to `normalized=True`.
 
     Returns
     -------
@@ -24,7 +27,12 @@ def make_magaox_bump_mask(normalized=False, with_spiders=True):
         The Magellan aperture.
     '''
 
-    magnification_factor = 6.5/9e-3 # Mag factor to scale 9 mm bump mask up to 6.5 m pupil diameter
+    if pupil_diameter <= 0:
+        raise ValueError('pupil_diameter must be > 0.')
+
+    effective_pupil_diameter = 1.0 if normalized else pupil_diameter
+    magnification_factor = effective_pupil_diameter / 9e-3
+
     mask_inner = 2.79e-3 * magnification_factor # meter
     mask_outer = 8.604e-3 * magnification_factor # meter
 
@@ -34,22 +42,16 @@ def make_magaox_bump_mask(normalized=False, with_spiders=True):
 
     radius = np.hypot(bump_mask_pos[0], bump_mask_pos[1])
     theta = np.arctan2(bump_mask_pos[1], bump_mask_pos[0]) - np.deg2rad(25.2) #+ np.pi/2 # Adjusted bump angle to better center it on spider
-    bump_mask_pos = [radius * np.cos(theta), radius * np.sin(theta)]
+    bump_mask_pos = np.array([radius * np.cos(theta), radius * np.sin(theta)])
 
-    pupil_diameter = 6.5  # meter
     spider_width1 = 0.1917e-3 * magnification_factor  # meter 
     spider_width2 = 0.1917e-3  * magnification_factor  # meter
     central_obscuration_ratio = mask_inner / mask_outer 
-    spider_offset = np.array([0.0, 0.34])  # meter
-
-    if normalized:
-        spider_width1 /= pupil_diameter
-        spider_width2 /= pupil_diameter
-        spider_offset /= pupil_diameter
-        bump_mask_pos /= pupil_diameter
-        bump_mask_diameter /= pupil_diameter
-        pupil_diameter = 1.0
-
+    spider_offset = np.array([0.0, 0.34 / 6.5]) * effective_pupil_diameter
+    spider1_offset_correction = np.array([0.0, -0.0185 / 6.5]) * effective_pupil_diameter
+    spider2_offset_correction = np.array([0.0, 0.0200 / 6.5]) * effective_pupil_diameter
+    spider3_offset_correction = np.array([0.0, -0.0220 / 6.5]) * effective_pupil_diameter
+    spider4_offset_correction = np.array([0.0, 0.0230 / 6.5]) * effective_pupil_diameter
     obstructed_aperture = make_obstructed_circular_aperture(mask_outer, central_obscuration_ratio)
     bump_mask = make_circular_aperture(bump_mask_diameter, center=bump_mask_pos)  # Generate bump cover for the MagAO-X DM
     
@@ -57,33 +59,41 @@ def make_magaox_bump_mask(normalized=False, with_spiders=True):
         return obstructed_aperture
 	
 	# spider offsets corrections based on bumpMask fits file from J. Males.
-    spider1 = make_spider_infinite(spider_offset - np.array([0, -0.0185]), 45.0, spider_width1)
-    spider2 = make_spider_infinite(-spider_offset - np.array([0, 0.020]), -45.0, spider_width1)
-    spider3 = make_spider_infinite(-spider_offset + np.array([0, -0.022]), 45.0 + 180.0, spider_width2)
-    spider4 = make_spider_infinite(spider_offset + np.array([0, 0.023]), -45.0 + 180.0, spider_width2)
+    spider1 = make_spider_infinite(spider_offset - spider1_offset_correction, 45.0, spider_width1)
+    spider2 = make_spider_infinite(-spider_offset - spider2_offset_correction, -45.0, spider_width1)
+    spider3 = make_spider_infinite(-spider_offset + spider3_offset_correction, 45.0 + 180.0, spider_width2)
+    spider4 = make_spider_infinite(spider_offset + spider4_offset_correction, -45.0 + 180.0, spider_width2)
 
     def func(grid):
         return obstructed_aperture(grid) * spider1(grid) * spider2(grid) * spider3(grid) * spider4(grid) * (1 - bump_mask(grid))
     
     return func
 
-def make_magaox_large_lyot_stop(normalized=False, with_spiders=True):
+def make_magaox_large_lyot_stop(normalized=False, with_spiders=True, pupil_diameter=6.5):
     '''Make the Magellan bump mask.
 
     Parameters
     ----------
     normalized : boolean
-        If this is True, the outer diameter will be scaled to 1. Otherwise, the
-        diameter of the pupil will be 6.5 meters.
+        If this is True, the outer diameter will be scaled to 1.
     with_spiders: boolean
         If this is False, the spiders will be left out.
+    pupil_diameter : float
+        Physical pupil diameter in meters when `normalized` is False.
+        Default is 6.5 (previous behavior). Set to 9e-3 for the native mask scale.
+        Using `pupil_diameter=1.0` is equivalent to `normalized=True`.
 
     Returns
     -------
     Field generator
         The Magellan aperture.
     '''
-    magnification_factor = 6.5/9e-3 # Mag factor to scale 9 mm bump mask up to 6.5 m pupil diameter
+    if pupil_diameter <= 0:
+        raise ValueError('pupil_diameter must be > 0.')
+
+    effective_pupil_diameter = 1.0 if normalized else pupil_diameter
+    magnification_factor = effective_pupil_diameter / 9e-3
+
     mask_inner = 3.60017e-3 * magnification_factor # meter
     mask_outer = 8.02356e-3 * magnification_factor # meter
 
@@ -93,21 +103,16 @@ def make_magaox_large_lyot_stop(normalized=False, with_spiders=True):
 
     radius = np.hypot(bump_mask_pos[0], bump_mask_pos[1])
     theta = np.arctan2(bump_mask_pos[1], bump_mask_pos[0]) - np.deg2rad(25.2)
-    bump_mask_pos = [radius * np.cos(theta), radius * np.sin(theta)]
+    bump_mask_pos = np.array([radius * np.cos(theta), radius * np.sin(theta)])
 
-    pupil_diameter = 6.5 # meter
     spider_width1 = 0.3830e-3 * magnification_factor # meter 
     spider_width2 = 0.3830e-3  * magnification_factor # meter
     central_obscuration_ratio = mask_inner / mask_outer 
-    spider_offset = np.array([0, 0.34])  # meter
-
-    if normalized:
-        spider_width1 /= pupil_diameter
-        spider_width2 /= pupil_diameter
-        spider_offset /= pupil_diameter
-        bump_mask_pos /= pupil_diameter
-        bump_mask_diameter /= pupil_diameter
-        pupil_diameter = 1.0
+    spider_offset = np.array([0.0, 0.34 / 6.5]) * effective_pupil_diameter
+    spider1_offset_correction = np.array([0.0, -0.0185 / 6.5]) * effective_pupil_diameter
+    spider2_offset_correction = np.array([0.0, 0.0200 / 6.5]) * effective_pupil_diameter
+    spider3_offset_correction = np.array([0.0, -0.0220 / 6.5]) * effective_pupil_diameter
+    spider4_offset_correction = np.array([0.0, 0.0230 / 6.5]) * effective_pupil_diameter
 
     obstructed_aperture = make_obstructed_circular_aperture(mask_outer, central_obscuration_ratio)
     bump_mask = make_circular_aperture(bump_mask_diameter, center=bump_mask_pos) # Generate bump cover for Magellan pupil
@@ -116,10 +121,10 @@ def make_magaox_large_lyot_stop(normalized=False, with_spiders=True):
         return obstructed_aperture
 
 	# spider offsets corrections based on bumpMask fits file from J. Males.
-    spider1 = make_spider_infinite(spider_offset - np.array([0, -0.0185]), 45.0, spider_width1)
-    spider2 = make_spider_infinite(-spider_offset - np.array([0, 0.020]), -45.0, spider_width1)
-    spider3 = make_spider_infinite(-spider_offset + np.array([0, -0.022]), 45.0 + 180.0, spider_width2)
-    spider4 = make_spider_infinite(spider_offset + np.array([0, 0.023]), -45.0 + 180.0, spider_width2)
+    spider1 = make_spider_infinite(spider_offset - spider1_offset_correction, 45.0, spider_width1)
+    spider2 = make_spider_infinite(-spider_offset - spider2_offset_correction, -45.0, spider_width1)
+    spider3 = make_spider_infinite(-spider_offset + spider3_offset_correction, 45.0 + 180.0, spider_width2)
+    spider4 = make_spider_infinite(spider_offset + spider4_offset_correction, -45.0 + 180.0, spider_width2)
 
     def func(grid):
         return obstructed_aperture(grid) * spider1(grid) * spider2(grid) * spider3(grid) * spider4(grid) * (1 - bump_mask(grid))
