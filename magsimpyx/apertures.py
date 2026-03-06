@@ -86,7 +86,7 @@ def make_magaox_large_lyot_stop(normalized=False, with_spiders=True, pupil_diame
     Returns
     -------
     Field generator
-        The Magellan aperture.
+        The MagAO-X large Lyot stop.
     '''
     if pupil_diameter <= 0:
         raise ValueError('pupil_diameter must be > 0.')

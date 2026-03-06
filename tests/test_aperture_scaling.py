@@ -13,7 +13,7 @@ def pupil_grid_6p5m():
 
 @pytest.fixture
 def pupil_grid_9mm():
-    return make_pupil_grid(256, 9e-3)    
+    return make_pupil_grid(256, 9e-3)
 
 @pytest.fixture
 def pupil_grid_25p448m():
@@ -41,7 +41,7 @@ def test_make_magaox_large_lyot_stop(pupil_grid_1, pupil_grid_6p5m, pupil_grid_9
     assert np.all(lyot_stop_1 == lyot_stop_6p5m)
     assert np.all(lyot_stop_1 == lyot_stop_9mm)
 
-def test_make_magaox_gmt_lyot_aperture(pupil_grid_1, pupil_grid_25p448m):
+def test_make_gmt_lyot_aperture(pupil_grid_1, pupil_grid_25p448m):
     '''Test that the GMT Lyot aperture is correctly scaled for different pupil grid sizes.
     '''
 
