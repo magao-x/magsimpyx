@@ -70,7 +70,7 @@ def make_magaox_bump_mask(normalized=False, with_spiders=True, pupil_diameter=6.
     return func
 
 def make_magaox_large_lyot_stop(normalized=False, with_spiders=True, pupil_diameter=6.5):
-    '''Make the Magellan bump mask.
+    '''Make the MagAO-X large Lyot stop.
 
     Parameters
     ----------
