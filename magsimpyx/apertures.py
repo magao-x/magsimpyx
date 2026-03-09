@@ -7,19 +7,20 @@ __all__ = [
 	'make_gmt_lyot_aperture'
 ]
 
-def make_magaox_bump_mask(normalized=False, with_spiders=True, pupil_diameter=6.5):
+def make_magaox_bump_mask(normalized=False, with_spiders=True, aperture_scale="telescope"):
     '''Make the Magellan bump mask.
 
     Parameters
     ----------
     normalized : boolean
-        If this is True, the outer diameter will be scaled to 1.
+        If this is True, the outer diameter will be normalized by the telescope diameter such that the size of the pupil_grid is 1.
     with_spiders: boolean
         If this is False, the spiders will be left out.
-    pupil_diameter : float
-        Physical pupil diameter in meters when `normalized` is False.
-        Default is 6.5 (previous behavior). Set to 9e-3 for the native mask scale.
-        Using `pupil_diameter=1.0` is equivalent to `normalized=True`.
+    aperture_scale : string
+        telescope : Scale the aperture dimensions to match the physical size of the telescope
+		pupil: Scale the aperture dimensions to match the physical size of the pupil 
+        Scale factor for the aperture dimensions.
+        normalized: Same as `normalized=True`. The outer diameter will be scaled to 1.
 
     Returns
     -------
@@ -27,11 +28,16 @@ def make_magaox_bump_mask(normalized=False, with_spiders=True, pupil_diameter=6.
         The Magellan aperture.
     '''
 
-    if pupil_diameter <= 0:
-        raise ValueError('pupil_diameter must be > 0.')
-
-    effective_pupil_diameter = 1.0 if normalized else pupil_diameter
-    magnification_factor = effective_pupil_diameter / 9e-3
+    if normalized or aperture_scale == "normalized":
+        pupil_diameter = 1.0
+    elif aperture_scale == "telescope":
+        pupil_diameter = 6.5
+    elif aperture_scale == "pupil":
+        pupil_diameter = 9e-3
+    else:
+        raise ValueError('Invalid aperture_scale. Must be "telescope", "pupil", or "normalized".')
+    
+    magnification_factor = pupil_diameter / 9e-3
 
     mask_inner = 2.79e-3 * magnification_factor # meter
     mask_outer = 8.604e-3 * magnification_factor # meter
@@ -47,11 +53,11 @@ def make_magaox_bump_mask(normalized=False, with_spiders=True, pupil_diameter=6.
     spider_width1 = 0.1917e-3 * magnification_factor  # meter 
     spider_width2 = 0.1917e-3  * magnification_factor  # meter
     central_obscuration_ratio = mask_inner / mask_outer 
-    spider_offset = np.array([0.0, 0.34 / 6.5]) * effective_pupil_diameter
-    spider1_offset_correction = np.array([0.0, -0.0185 / 6.5]) * effective_pupil_diameter
-    spider2_offset_correction = np.array([0.0, 0.0200 / 6.5]) * effective_pupil_diameter
-    spider3_offset_correction = np.array([0.0, -0.0220 / 6.5]) * effective_pupil_diameter
-    spider4_offset_correction = np.array([0.0, 0.0230 / 6.5]) * effective_pupil_diameter
+    spider_offset = np.array([0.0, 0.34 / 6.5]) * pupil_diameter
+    spider1_offset_correction = np.array([0.0, -0.0185 / 6.5]) * pupil_diameter
+    spider2_offset_correction = np.array([0.0, 0.0200 / 6.5]) * pupil_diameter
+    spider3_offset_correction = np.array([0.0, -0.0220 / 6.5]) * pupil_diameter
+    spider4_offset_correction = np.array([0.0, 0.0230 / 6.5]) *  pupil_diameter
     obstructed_aperture = make_obstructed_circular_aperture(mask_outer, central_obscuration_ratio)
     bump_mask = make_circular_aperture(bump_mask_diameter, center=bump_mask_pos)  # Generate bump cover for the MagAO-X DM
     
@@ -69,30 +75,36 @@ def make_magaox_bump_mask(normalized=False, with_spiders=True, pupil_diameter=6.
     
     return func
 
-def make_magaox_large_lyot_stop(normalized=False, with_spiders=True, pupil_diameter=6.5):
+def make_magaox_large_lyot_stop(normalized=False, with_spiders=True, aperture_scale="telescope"):
     '''Make the MagAO-X large Lyot stop.
 
     Parameters
     ----------
     normalized : boolean
-        If this is True, the outer diameter will be scaled to 1.
+        If this is True, the outer diameter will be normalized by the telescope diameter such that the size of the pupil_grid is 1.
     with_spiders: boolean
         If this is False, the spiders will be left out.
-    pupil_diameter : float
-        Physical pupil diameter in meters when `normalized` is False.
-        Default is 6.5 (previous behavior). Set to 9e-3 for the native mask scale.
-        Using `pupil_diameter=1.0` is equivalent to `normalized=True`.
+    aperture_scale : string
+        telescope : Scale the aperture dimensions to match the physical size of the telescope
+		pupil: Scale the aperture dimensions to match the physical size of the pupil
+        Scale factor for the aperture dimensions.
+        normalized: Same as `normalized=True`. The outer diameter will be scaled to 1.
 
     Returns
     -------
     Field generator
         The MagAO-X large Lyot stop.
     '''
-    if pupil_diameter <= 0:
-        raise ValueError('pupil_diameter must be > 0.')
+    if normalized or aperture_scale == "normalized":
+        pupil_diameter = 1.0
+    elif aperture_scale == "telescope":
+        pupil_diameter = 6.5
+    elif aperture_scale == "pupil":
+        pupil_diameter = 9e-3
+    else:
+        raise ValueError('Invalid aperture_scale. Must be "telescope", "pupil", or "normalized".')
 
-    effective_pupil_diameter = 1.0 if normalized else pupil_diameter
-    magnification_factor = effective_pupil_diameter / 9e-3
+    magnification_factor = pupil_diameter / 9e-3
 
     mask_inner = 3.60017e-3 * magnification_factor # meter
     mask_outer = 8.02356e-3 * magnification_factor # meter
@@ -108,11 +120,11 @@ def make_magaox_large_lyot_stop(normalized=False, with_spiders=True, pupil_diame
     spider_width1 = 0.3830e-3 * magnification_factor # meter 
     spider_width2 = 0.3830e-3  * magnification_factor # meter
     central_obscuration_ratio = mask_inner / mask_outer 
-    spider_offset = np.array([0.0, 0.34 / 6.5]) * effective_pupil_diameter
-    spider1_offset_correction = np.array([0.0, -0.0185 / 6.5]) * effective_pupil_diameter
-    spider2_offset_correction = np.array([0.0, 0.0200 / 6.5]) * effective_pupil_diameter
-    spider3_offset_correction = np.array([0.0, -0.0220 / 6.5]) * effective_pupil_diameter
-    spider4_offset_correction = np.array([0.0, 0.0230 / 6.5]) * effective_pupil_diameter
+    spider_offset = np.array([0.0, 0.34 / 6.5]) * pupil_diameter
+    spider1_offset_correction = np.array([0.0, -0.0185 / 6.5]) * pupil_diameter
+    spider2_offset_correction = np.array([0.0, 0.0200 / 6.5]) * pupil_diameter
+    spider3_offset_correction = np.array([0.0, -0.0220 / 6.5]) * pupil_diameter
+    spider4_offset_correction = np.array([0.0, 0.0230 / 6.5]) * pupil_diameter
 
     obstructed_aperture = make_obstructed_circular_aperture(mask_outer, central_obscuration_ratio)
     bump_mask = make_circular_aperture(bump_mask_diameter, center=bump_mask_pos) # Generate bump cover for Magellan pupil

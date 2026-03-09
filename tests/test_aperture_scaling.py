@@ -25,7 +25,7 @@ def test_make_magaox_bump_mask(pupil_grid_1, pupil_grid_6p5m, pupil_grid_9mm):
 
     bump_mask_1 = make_magaox_bump_mask(normalized=True)(pupil_grid_1)
     bump_mask_6p5m = make_magaox_bump_mask()(pupil_grid_6p5m)
-    bump_mask_9mm = make_magaox_bump_mask(pupil_diameter=9e-3)(pupil_grid_9mm)
+    bump_mask_9mm = make_magaox_bump_mask(aperture_scale="pupil")(pupil_grid_9mm)
 
     assert np.all(bump_mask_1 == bump_mask_6p5m)
     assert np.all(bump_mask_1 == bump_mask_9mm)
@@ -36,7 +36,7 @@ def test_make_magaox_large_lyot_stop(pupil_grid_1, pupil_grid_6p5m, pupil_grid_9
 
     lyot_stop_1 = make_magaox_large_lyot_stop(normalized=True)(pupil_grid_1)
     lyot_stop_6p5m = make_magaox_large_lyot_stop()(pupil_grid_6p5m)
-    lyot_stop_9mm  = make_magaox_large_lyot_stop(pupil_diameter=9e-3)(pupil_grid_9mm)
+    lyot_stop_9mm  = make_magaox_large_lyot_stop(aperture_scale="pupil")(pupil_grid_9mm)
 
     assert np.all(lyot_stop_1 == lyot_stop_6p5m)
     assert np.all(lyot_stop_1 == lyot_stop_9mm)
